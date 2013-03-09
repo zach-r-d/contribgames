@@ -1,0 +1,30 @@
+{
+	"name": "My Awesome Game",
+	"desc": "A really awesome game that I made! It has all the most awesome game elements in it!",
+	"url": "http://www.myawesomegame.com/",
+	
+	"authors": [
+		{
+			"login": "mname",
+			"name": "My Name",
+			"year": "2014"
+		}
+	],
+	
+	"origin" : {
+		"category": "class",
+		"class": "cs195n",
+		"semester": "2012s"
+	},
+
+	"commands": [
+		{
+			"aliases": [ "mygame", "MyGame" ],
+			"desc": "Run the game"
+		},
+		{
+			"aliases": [ "mygame-ed" ],
+			"desc": "Run the map editor"
+		}
+	]
+}
