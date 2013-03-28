@@ -16,23 +16,23 @@ import logging
 import sys
 
 def main():
-	topParser = argparse.ArgumentParser(description='Student games information tool');
-	topParser.add_argument('-v', '--verbose', nargs='?', action=VAction, dest='verbosity', help='Show debugging information; -v 2 or -vv shows even more debugging information');
+	topParser = argparse.ArgumentParser(description='Student games information tool')
+	topParser.add_argument('-v', '--verbose', nargs='?', action=VAction, dest='verbosity', help='Show debugging information; -v 2 or -vv shows even more debugging information')
 
-	subs = topParser.add_subparsers(title='command',help='command help');
+	subs = topParser.add_subparsers(title='command',help='command help')
 
-	listParser = subs.add_parser('list', help='THIS IS HELPFUL');
-	listParser.set_defaults(func=listGames);
+	listParser = subs.add_parser('list', help='THIS IS HELPFUL')
+	listParser.set_defaults(func=listGames)
 
-	infoParser = subs.add_parser('info', help='SO IS THIS');
-	infoParser.set_defaults(func=gameInfo);
+	infoParser = subs.add_parser('info', help='SO IS THIS')
+	infoParser.set_defaults(func=gameInfo)
 
-	args = topParser.parse_args();
+	args = topParser.parse_args()
 
-	v = args.verbosity or 0;
-	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG));
+	v = args.verbosity or 0
+	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG))
 
-	args.func(args);
+	args.func(args)
 
 # from stackoverflow
 class VAction(argparse.Action):
@@ -47,89 +47,89 @@ class VAction(argparse.Action):
 
 def listGames(options):
 	for i in getAllGames():
-		print(i);
-	pass;
+		print(i)
+	pass
 
 def getAllGames():
-	projects = set(listdir('/contrib/projects/'));
-	projects = projects | { sub('\.json$', '', p) for p in listdir('/contrib/projects/games/manual/')};
-	games = [];
+	projects = set(listdir('/contrib/projects/'))
+	projects = projects | { sub('\.json$', '', p) for p in listdir('/contrib/projects/games/manual/')}
+	games = []
 	for p in projects:
-		game = loadGame(p);
+		game = loadGame(p)
 		if game != None:
-			logging.info('Successfully loaded "%s"' % p);
-			games.append(game);
-	return games;
+			logging.info('Successfully loaded "%s"' % p)
+			games.append(game)
+	return games
 
 def loadGame(projName):
 	"""Returns either a Game or None."""
-	game = None;
+	game = None
 
-	f = None;
+	f = None
 	try:
-		f = open('/contrib/projects/'+projName+'/.games.json');
+		f = open('/contrib/projects/'+projName+'/.games.json')
 	except IOError as e:
-		logging.debug('/contrib/projects/'+projName+'/.games.json does not exist');
+		logging.debug('/contrib/projects/'+projName+'/.games.json does not exist')
 		try:
-			f = open('/contrib/projects/games/manual/'+projName+'.json');
+			f = open('/contrib/projects/games/manual/'+projName+'.json')
 		except IOError as e:
-			logging.debug('/contrib/projects/games/manual/'+projName+'.json does not exist');
-			return None;
+			logging.debug('/contrib/projects/games/manual/'+projName+'.json does not exist')
+			return None
 
 	if f is None:
-		logging.info('No .json file found for project "%s", probably not a game' % projName);
-		return None;
+		logging.info('No .json file found for project "%s", probably not a game' % projName)
+		return None
 
-	js = None;
+	js = None
 	try:
-		js = load(f);
+		js = load(f)
 	except Exception as e:
-		logging.info('Invalid json for project "%s"' % projName);
-		return None;
+		logging.info('Invalid json for project "%s"' % projName)
+		return None
 	finally:
-		f.close();
+		f.close()
 
 	try:
-		game = Game(projName, js);
+		game = Game(projName, js)
 	except Exception as e:
-		logging.info('Unable to construct "%s"' % projName);
-		logging.debug('Problems with construction: '+str(e));
+		logging.info('Unable to construct "%s"' % projName)
+		logging.debug('Problems with construction: '+str(e))
 
-	return game;
+	return game
 
 class Game:
 	"""Represents a single contrib/ game."""
 	def __init__(self, projname, json):
-		log = ErrorLogger();
+		log = ErrorLogger()
 
-		self.projname = str(projname);
-		self.name = log.getValue(json, 'name');
-		self.desc = log.getValue(json, 'desc');
-		self.url = log.getValue(json, 'name', False);
+		self.projname = str(projname)
+		self.name = log.getValue(json, 'name')
+		self.desc = log.getValue(json, 'desc')
+		self.url = log.getValue(json, 'name', False)
 
 		self.json = json
 
 		if not log.okay:
-			raise Exception(log.log);
+			raise Exception(log.log)
 
 	def __str__(self):
-		return self.json.__str__();
+		return self.json.__str__()
 
 class ErrorLogger:
-	log = '';
-	okay = True;
+	log = ''
+	okay = True
 
 	def getValue(self, d, val, required=True):
 		if val in d:
-			return d[val];
+			return d[val]
 		elif required:
-			self.okay = False;
-			self.log += '\nMissing required "%s" attribute' % val;
+			self.okay = False
+			self.log += '\nMissing required "%s" attribute' % val
 		else:
-			return None;
+			return None
 
 def gameInfo(options):
-	pass;
+	pass
 
 if __name__ == "__main__":
-	main();
+	main()
