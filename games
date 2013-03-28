@@ -35,7 +35,7 @@ def set_and_parse_args():
 	subs = parser.add_subparsers(title='command', help='command help')
 
 	list_parser = subs.add_parser('list', help='THIS IS HELPFUL')
-	list_parser.set_defaults(func=list_games)
+	list_parser.set_defaults(func=print_games)
 
 	info_parser = subs.add_parser('info', help='SO IS THIS')
 	info_parser.set_defaults(func=show_game_info)
@@ -49,7 +49,7 @@ def setup_logging(verbosity):
 	else: level = logging.DEBUG
 	logging.basicConfig(level=level)
 
-def list_games(options):
+def print_games(options):
 	"""Finds all games in contrib and displays them to the user."""
 	for game in get_games_list():
 		print(game)
