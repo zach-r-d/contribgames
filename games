@@ -97,34 +97,39 @@ def load_game(proj_name):
 
 class Game:
 	"""Represents a single contrib/ game."""
-	def __init__(self, projname, game_info):
-		log = ErrorLogger()
+	def __init__(self, proj_name, game_info):
+		v = self.InitVerifier()
 
-		self.projname = str(projname)
-		self.name = log.getValue(game_info, 'name')
-		self.desc = log.getValue(game_info, 'desc')
-		self.url = log.getValue(game_info, 'name', False)
-
+		self.proj_name = proj_name
+		self.name = v.getAndVerify(game_info, 'name')
+		self.desc = v.getAndVerify(game_info, 'desc')
+		self.url = v.getAndVerify(game_info, 'url', False)
 		self.loaded_json = game_info
 
-		if not log.okay:
-			raise Exception(log.log)
+		if not v.valid: raise Exception(v.getLog())
 
 	def __str__(self):
-		return self.loaded_json.__str__()
+		return str(self.loaded_json)
 
-class ErrorLogger:
-	log = ''
-	okay = True
+	class InitVerifier:
+		"""Handles verification of Game.__init__ through the given json."""
+		log = []
+		valid = True
 
-	def getValue(self, d, val, required=True):
-		if val in d:
-			return d[val]
-		elif required:
-			self.okay = False
-			self.log += '\nMissing required "%s" attribute' % val
-		else:
+		def getAndVerify(self, d, key, required=True):
+			"""Gets d[key] if it exists, otherwise None.
+
+			If a non-existent key is required, an error is logged.
+
+			"""
+			if key in d: return d[key]
+			elif required:
+				self.valid = False
+				self.log.append('Missing required "%s" attribute' % key)
 			return None
+
+		def getLog(self):
+			return '; '.join(self.log)
 
 def show_game_info(options):
 	pass
