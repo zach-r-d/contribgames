@@ -17,15 +17,14 @@ import sys
 
 def main():
 	args = set_and_parse_args()
-	setup_logging(args.verbosity or 0)
+	setup_logging(args.verbose)
 	args.func(args)
 
 def set_and_parse_args():
 	parser = argparse.ArgumentParser(description='Student games information '
 			'tool')
-	parser.add_argument('-v', '--verbose', nargs='?', action=VAction,
-			dest='verbosity', help='Show debugging information; -v 2 or -vv '
-			'shows even more debugging information')
+	parser.add_argument('-v', '--verbose', action='count', help='Show '
+			'debugging information; -vv shows even more debugging information')
 
 	subs = parser.add_subparsers(title='command', help='command help')
 
@@ -39,21 +38,10 @@ def set_and_parse_args():
 
 def setup_logging(verbosity):
 	"""Inits logging on the number of -v args received, given as verbosity."""
-	if verbosity < 1: level = logging.WARNING
+	if verbosity is None: level = logging.WARNING
 	elif verbosity == 1: level = logging.INFO
 	else: level = logging.DEBUG
 	logging.basicConfig(level=level)
-
-# from stackoverflow
-class VAction(argparse.Action):
-	def __call__(self, parser, args, values, option_string=None):
-		if values==None:
-			values='1'
-		try:
-			values=int(values)
-		except ValueError:
-			values=values.count('v')+1
-		setattr(args, self.dest, values)
 
 def listGames(options):
 	for i in getAllGames():
