@@ -25,14 +25,13 @@ def set_and_parse_args():
 			'tool')
 	parser.add_argument('-v', '--verbose', action='count', help='Show '
 			'debugging information; -vv shows even more debugging information')
-
 	subs = parser.add_subparsers(title='command', help='command help')
 
 	list_parser = subs.add_parser('list', help='THIS IS HELPFUL')
-	list_parser.set_defaults(func=listGames)
+	list_parser.set_defaults(func=list_games)
 
 	info_parser = subs.add_parser('info', help='SO IS THIS')
-	info_parser.set_defaults(func=gameInfo)
+	info_parser.set_defaults(func=show_game_info)
 
 	return parser.parse_args()
 
@@ -43,54 +42,54 @@ def setup_logging(verbosity):
 	else: level = logging.DEBUG
 	logging.basicConfig(level=level)
 
-def listGames(options):
 	for i in getAllGames():
 		print(i)
 	pass
+def list_games(options):
 
-def getAllGames():
+def get_all_games():
 	projects = set(listdir('/contrib/projects/'))
 	projects = projects | { sub('\.json$', '', p) for p in listdir('/contrib/projects/games/manual/')}
 	games = []
 	for p in projects:
-		game = loadGame(p)
+		game = load_game(p)
 		if game != None:
 			logging.info('Successfully loaded "%s"' % p)
 			games.append(game)
 	return games
 
-def loadGame(projName):
+def load_game(proj_name):
 	"""Returns either a Game or None."""
 	game = None
 
 	f = None
 	try:
-		f = open('/contrib/projects/'+projName+'/.games.json')
+		f = open('/contrib/projects/'+proj_name+'/.games.json')
 	except IOError as e:
-		logging.debug('/contrib/projects/'+projName+'/.games.json does not exist')
+		logging.debug('/contrib/projects/'+proj_name+'/.games.json does not exist')
 		try:
-			f = open('/contrib/projects/games/manual/'+projName+'.json')
+			f = open('/contrib/projects/games/manual/'+proj_name+'.json')
 		except IOError as e:
-			logging.debug('/contrib/projects/games/manual/'+projName+'.json does not exist')
+			logging.debug('/contrib/projects/games/manual/'+proj_name+'.json does not exist')
 			return None
 
 	if f is None:
-		logging.info('No .json file found for project "%s", probably not a game' % projName)
+		logging.info('No .json file found for project "%s", probably not a game' % proj_name)
 		return None
 
 	js = None
 	try:
 		js = load(f)
 	except Exception as e:
-		logging.info('Invalid json for project "%s"' % projName)
+		logging.info('Invalid json for project "%s"' % proj_name)
 		return None
 	finally:
 		f.close()
 
 	try:
-		game = Game(projName, js)
+		game = Game(proj_name, js)
 	except Exception as e:
-		logging.info('Unable to construct "%s"' % projName)
+		logging.info('Unable to construct "%s"' % proj_name)
 		logging.debug('Problems with construction: '+str(e))
 
 	return game
@@ -126,7 +125,7 @@ class ErrorLogger:
 		else:
 			return None
 
-def gameInfo(options):
+def show_game_info(options):
 	pass
 
 if __name__ == "__main__":
