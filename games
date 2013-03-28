@@ -6,13 +6,13 @@ games list
 games info <game>
 
 """
-import argparse
-import logging
 from datetime import datetime, timedelta
 from json import load
 from os import getenv, listdir, path
 from random import randint
-from re import search,sub
+from re import search, sub
+import argparse
+import logging
 import sys
 
 class ErrorLogger:
