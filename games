@@ -25,21 +25,18 @@ GAME_JSON_FILE = '.games.json'
 def main():
 	args = set_and_parse_args()
 	setup_logging(args.verbose)
-	args.func(args)
+	if args.info: show_game_info() # TODO: Argument.
+	else: print_games()
 
 def set_and_parse_args():
-	parser = argparse.ArgumentParser(description='Student games information '
-			'tool')
-	parser.add_argument('-v', '--verbose', action='count', help='Show '
+	parser = argparse.ArgumentParser(description='Student contrib games '
+			'information tool. Running without arguments will list all the '
+			'known games in contrib.') # TODO: Add info about adding your game.
+	parser.add_argument('-v', '--verbose', action='count', help='show '
 			'debugging information; -vv shows even more debugging information')
-	subs = parser.add_subparsers(title='command', help='command help')
-
-	list_parser = subs.add_parser('list', help='THIS IS HELPFUL')
-	list_parser.set_defaults(func=print_games)
-
-	info_parser = subs.add_parser('info', help='SO IS THIS')
-	info_parser.set_defaults(func=show_game_info)
-
+	parser.add_argument('-i', '--info', nargs=1, metavar='NAME',
+			help='display detailed information about the project specified by '
+			'NAME')
 	return parser.parse_args()
 
 def setup_logging(verbosity):
@@ -49,7 +46,7 @@ def setup_logging(verbosity):
 	else: level = logging.DEBUG
 	logging.basicConfig(level=level)
 
-def print_games(options):
+def print_games():
 	"""Finds all games in contrib and displays them to the user."""
 	for game in get_games_list():
 		print(game)
@@ -131,8 +128,8 @@ class Game:
 		def getLog(self):
 			return '; '.join(self.log)
 
-def show_game_info(options):
-	pass
+def show_game_info():
+	print('show_game_info(): NOT YET IMPLEMENTED.')
 
 if __name__ == '__main__':
 	main()
