@@ -10,10 +10,14 @@ from datetime import datetime, timedelta
 from json import load
 from os import getenv, listdir, path
 from random import randint
-from re import search, sub
 import argparse
 import logging
+import re
 import sys
+
+CONTRIB_DIR = '/contrib/projects/'
+GAMES_DIR = CONTRIB_DIR + 'games/'
+MANUAL_ENTRY_DIR = GAMES_DIR + 'manual/' # TODO: The path is confusing.
 
 def main():
 	args = set_and_parse_args()
@@ -42,19 +46,20 @@ def setup_logging(verbosity):
 	else: level = logging.DEBUG
 	logging.basicConfig(level=level)
 
-	for i in getAllGames():
-		print(i)
-	pass
 def list_games(options):
+	"""Finds all games in contrib and displays them to the user."""
+	for game in get_games_list():
+		print(game)
 
-def get_all_games():
-	projects = set(listdir('/contrib/projects/'))
-	projects = projects | { sub('\.json$', '', p) for p in listdir('/contrib/projects/games/manual/')}
+def get_games_list():
+	"""Returns a list of Game for all the games in contrib."""
+	projects = set(listdir(CONTRIB_DIR))
+	projects |= {re.sub('\.json$', '', f) for f in listdir(MANUAL_ENTRY_DIR)}
 	games = []
-	for p in projects:
-		game = load_game(p)
-		if game != None:
-			logging.info('Successfully loaded "%s"' % p)
+	for proj_name in projects:
+		game = load_game(proj_name)
+		if isinstance(game, Game):
+			logging.info('Successfully loaded "%s".' % proj_name)
 			games.append(game)
 	return games
 
