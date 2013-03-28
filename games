@@ -6,14 +6,11 @@ games list
 games info <game>
 
 """
-from datetime import datetime, timedelta
-from os import getenv, listdir, path
-from random import randint
-import argparse
+from argparse import ArgumentParser
+from os import listdir
 import json
 import logging
 import re
-import sys
 
 CONTRIB_DIR = '/contrib/projects/'
 GAMES_DIR = CONTRIB_DIR + 'games/'
@@ -25,13 +22,13 @@ GAME_JSON_FILE = '.games.json'
 def main():
 	args = set_and_parse_args()
 	setup_logging(args.verbose)
-	if args.info: show_game_info() # TODO: Argument.
+	if args.info: show_game_info()
 	else: print_games()
 
 def set_and_parse_args():
-	parser = argparse.ArgumentParser(description='Student contrib games '
-			'information tool. Running without arguments will list all the '
-			'known games in contrib.') # TODO: Add info about adding your game.
+	parser = ArgumentParser(description='Student contrib games information '
+			'tool. Running without arguments will list all the known games in '
+			'contrib.') # TODO: Add info about adding your game.
 	parser.add_argument('-v', '--verbose', action='count', help='show '
 			'debugging information; -vv shows even more debugging information')
 	parser.add_argument('-i', '--info', nargs=1, metavar='NAME',
