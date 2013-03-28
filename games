@@ -15,36 +15,51 @@ import argparse
 import logging
 import sys
 
-class ErrorLogger:
-	log = '';
-	okay = True;
+def main():
+	topParser = argparse.ArgumentParser(description='Student games information tool');
+	topParser.add_argument('-v', '--verbose', nargs='?', action=VAction, dest='verbosity', help='Show debugging information; -v 2 or -vv shows even more debugging information');
 
-	def getValue(self, d, val, required=True):
-		if val in d:
-			return d[val];
-		elif required:
-			self.okay = False;
-			self.log += '\nMissing required "%s" attribute' % val;
-		else:
-			return None;
+	subs = topParser.add_subparsers(title='command',help='command help');
 
-class Game:
-	"""Represents a single contrib/ game."""
-	def __init__(self, projname, json):
-		log = ErrorLogger();
+	listParser = subs.add_parser('list', help='THIS IS HELPFUL');
+	listParser.set_defaults(func=listGames);
 
-		self.projname = str(projname);
-		self.name = log.getValue(json, 'name');
-		self.desc = log.getValue(json, 'desc');
-		self.url = log.getValue(json, 'name', False);
+	infoParser = subs.add_parser('info', help='SO IS THIS');
+	infoParser.set_defaults(func=gameInfo);
 
-		self.json = json
+	args = topParser.parse_args();
 
-		if not log.okay:
-			raise Exception(log.log);
+	v = args.verbosity or 0;
+	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG));
 
-	def __str__(self):
-		return self.json.__str__();
+	args.func(args);
+
+# from stackoverflow
+class VAction(argparse.Action):
+	def __call__(self, parser, args, values, option_string=None):
+		if values==None:
+			values='1'
+		try:
+			values=int(values)
+		except ValueError:
+			values=values.count('v')+1
+		setattr(args, self.dest, values)
+
+def listGames(options):
+	for i in getAllGames():
+		print(i);
+	pass;
+
+def getAllGames():
+	projects = set(listdir('/contrib/projects/'));
+	projects = projects | { sub('\.json$', '', p) for p in listdir('/contrib/projects/games/manual/')};
+	games = [];
+	for p in projects:
+		game = loadGame(p);
+		if game != None:
+			logging.info('Successfully loaded "%s"' % p);
+			games.append(game);
+	return games;
 
 def loadGame(projName):
 	"""Returns either a Game or None."""
@@ -82,54 +97,39 @@ def loadGame(projName):
 
 	return game;
 
-def getAllGames():
-	projects = set(listdir('/contrib/projects/'));
-	projects = projects | { sub('\.json$', '', p) for p in listdir('/contrib/projects/games/manual/')};
-	games = [];
-	for p in projects:
-		game = loadGame(p);
-		if game != None:
-			logging.info('Successfully loaded "%s"' % p);
-			games.append(game);
-	return games;
+class Game:
+	"""Represents a single contrib/ game."""
+	def __init__(self, projname, json):
+		log = ErrorLogger();
 
-def listGames(options):
-	for i in getAllGames():
-		print(i);
-	pass;
+		self.projname = str(projname);
+		self.name = log.getValue(json, 'name');
+		self.desc = log.getValue(json, 'desc');
+		self.url = log.getValue(json, 'name', False);
+
+		self.json = json
+
+		if not log.okay:
+			raise Exception(log.log);
+
+	def __str__(self):
+		return self.json.__str__();
+
+class ErrorLogger:
+	log = '';
+	okay = True;
+
+	def getValue(self, d, val, required=True):
+		if val in d:
+			return d[val];
+		elif required:
+			self.okay = False;
+			self.log += '\nMissing required "%s" attribute' % val;
+		else:
+			return None;
 
 def gameInfo(options):
 	pass;
-
-# from stackoverflow
-class VAction(argparse.Action):
-	def __call__(self, parser, args, values, option_string=None):
-		if values==None:
-			values='1'
-		try:
-			values=int(values)
-		except ValueError:
-			values=values.count('v')+1
-		setattr(args, self.dest, values)
-
-def main():
-	topParser = argparse.ArgumentParser(description='Student games information tool');
-	topParser.add_argument('-v', '--verbose', nargs='?', action=VAction, dest='verbosity', help='Show debugging information; -v 2 or -vv shows even more debugging information');
-
-	subs = topParser.add_subparsers(title='command',help='command help');
-
-	listParser = subs.add_parser('list', help='THIS IS HELPFUL');
-	listParser.set_defaults(func=listGames);
-
-	infoParser = subs.add_parser('info', help='SO IS THIS');
-	infoParser.set_defaults(func=gameInfo);
-
-	args = topParser.parse_args();
-
-	v = args.verbosity or 0;
-	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG));
-
-	args.func(args);
 
 if __name__ == "__main__":
 	main();
