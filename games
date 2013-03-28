@@ -103,14 +103,14 @@ def gameInfo(options):
 
 # from stackoverflow
 class VAction(argparse.Action):
-    def __call__(self, parser, args, values, option_string=None):
-        if values==None:
-            values='1'
-        try:
-            values=int(values)
-        except ValueError:
-            values=values.count('v')+1
-        setattr(args, self.dest, values)
+	def __call__(self, parser, args, values, option_string=None):
+		if values==None:
+			values='1'
+		try:
+			values=int(values)
+		except ValueError:
+			values=values.count('v')+1
+		setattr(args, self.dest, values)
 
 def main():
 	topParser = argparse.ArgumentParser(description='Student games information tool');
@@ -132,4 +132,4 @@ def main():
 	args.func(args);
 
 if __name__ == "__main__":
-    main();
+	main();
