@@ -20,7 +20,7 @@ import sys
 class ErrorLogger:
 	log = '';
 	okay = True;
-	
+
 	def getValue(self, d, val, required=True):
 		if val in d:
 			return d[val];
@@ -30,28 +30,28 @@ class ErrorLogger:
 		else:
 			return None;
 	#end
-	
+
 #end
 
 class Game:
 	"""
 	Represents a single contrib/ game
 	"""
-	
+
 	def __init__(self, projname, json):
 		log = ErrorLogger();
-		
+
 		self.projname = str(projname);
 		self.name = log.getValue(json, 'name');
 		self.desc = log.getValue(json, 'desc');
 		self.url = log.getValue(json, 'name', False);
-		
+
 		self.json = json
-		
+
 		if not log.okay:
 			raise Exception(log.log);
 	#end
-		
+
 	def __str__(self):
 		return self.json.__str__();
 #end
@@ -61,7 +61,7 @@ def loadGame(projName):
 	Returns either a Game or None.
 	"""
 	game = None;
-	
+
 	f = None;
 	try:
 		f = open('/contrib/projects/'+projName+'/.games.json');
@@ -72,11 +72,11 @@ def loadGame(projName):
 		except IOError as e:
 			logging.debug('/contrib/projects/games/manual/'+projName+'.json does not exist');
 			return None;
-	
+
 	if f is None:
 		logging.info('No .json file found for project "%s", probably not a game' % projName);
 		return None;
-	
+
 	js = None;
 	try:
 		js = load(f);
@@ -85,13 +85,13 @@ def loadGame(projName):
 		return None;
 	finally:
 		f.close();
-	
+
 	try:
 		game = Game(projName, js);
 	except Exception as e:
 		logging.info('Unable to construct "%s"' % projName);
 		logging.debug('Problems with construction: '+str(e));
-	
+
 	return game;
 #end
 
@@ -131,17 +131,17 @@ class VAction(argparse.Action):
 def main():
 	topParser = argparse.ArgumentParser(description='Student games information tool');
 	topParser.add_argument('-v', '--verbose', nargs='?', action=VAction, dest='verbosity', help='Show debugging information; -v 2 or -vv shows even more debugging information');
-	
+
 	subs = topParser.add_subparsers(title='command',help='command help');
-	
+
 	listParser = subs.add_parser('list', help='THIS IS HELPFUL');
 	listParser.set_defaults(func=listGames);
-	
+
 	infoParser = subs.add_parser('info', help='SO IS THIS');
 	infoParser.set_defaults(func=gameInfo);
-	
+
 	args = topParser.parse_args();
-	
+
 	v = args.verbosity or 0;
 	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG));
 
