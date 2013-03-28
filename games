@@ -7,10 +7,10 @@ games info <game>
 
 """
 from datetime import datetime, timedelta
-from json import load
 from os import getenv, listdir, path
 from random import randint
 import argparse
+import json
 import logging
 import re
 import sys
@@ -18,6 +18,9 @@ import sys
 CONTRIB_DIR = '/contrib/projects/'
 GAMES_DIR = CONTRIB_DIR + 'games/'
 MANUAL_ENTRY_DIR = GAMES_DIR + 'manual/' # TODO: The path is confusing.
+
+MANUAL_ENTRY_POSTFIX = '.json'
+GAME_JSON_FILE = '.games.json'
 
 def main():
 	args = set_and_parse_args()
@@ -64,58 +67,51 @@ def get_games_list():
 	return games
 
 def load_game(proj_name):
-	"""Returns either a Game or None."""
-	game = None
+	"""Returns a Game if the given project is found, else returns None."""
+	proj_path = CONTRIB_DIR + proj_name + '/' + GAME_JSON_FILE
+	manual_entry_path = MANUAL_ENTRY_DIR + proj_name + MANUAL_ENTRY_POSTFIX
 
-	f = None
-	try:
-		f = open('/contrib/projects/'+proj_name+'/.games.json')
-	except IOError as e:
-		logging.debug('/contrib/projects/'+proj_name+'/.games.json does not exist')
+	json_paths = [proj_path, manual_entry_path]
+	for path in json_paths:
 		try:
-			f = open('/contrib/projects/games/manual/'+proj_name+'.json')
+			with open(path) as f:
+				game_info = json.load(f)
 		except IOError as e:
-			logging.debug('/contrib/projects/games/manual/'+proj_name+'.json does not exist')
-			return None
-
-	if f is None:
-		logging.info('No .json file found for project "%s", probably not a game' % proj_name)
+			# TODO: This is not true (ex: permission denied). Print e instead.
+			logging.debug(path + ' does not exist.')
+		except Exception as e: # TODO: Is there a more specific exception?
+			logging.info('Invalid json for project "%s".' % proj_name)
+		else:
+			break
+	else:
+		logging.info('No valid .json file found for project "%s".' % proj_name)
 		return None
 
-	js = None
 	try:
-		js = load(f)
+		game = Game(proj_name, game_info)
 	except Exception as e:
-		logging.info('Invalid json for project "%s"' % proj_name)
+		logging.info('Unable to construct "%s".' % proj_name)
+		logging.debug('Problems with construction: ' + str(e))
 		return None
-	finally:
-		f.close()
-
-	try:
-		game = Game(proj_name, js)
-	except Exception as e:
-		logging.info('Unable to construct "%s"' % proj_name)
-		logging.debug('Problems with construction: '+str(e))
-
 	return game
 
 class Game:
 	"""Represents a single contrib/ game."""
-	def __init__(self, projname, json):
+	def __init__(self, projname, game_info):
 		log = ErrorLogger()
 
 		self.projname = str(projname)
-		self.name = log.getValue(json, 'name')
-		self.desc = log.getValue(json, 'desc')
-		self.url = log.getValue(json, 'name', False)
+		self.name = log.getValue(game_info, 'name')
+		self.desc = log.getValue(game_info, 'desc')
+		self.url = log.getValue(game_info, 'name', False)
 
-		self.json = json
+		self.loaded_json = game_info
 
 		if not log.okay:
 			raise Exception(log.log)
 
 	def __str__(self):
-		return self.json.__str__()
+		return self.loaded_json.__str__()
 
 class ErrorLogger:
 	log = ''
