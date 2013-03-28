@@ -29,9 +29,6 @@ class ErrorLogger:
 			self.log += '\nMissing required "%s" attribute' % val;
 		else:
 			return None;
-	#end
-
-#end
 
 class Game:
 	"""
@@ -50,11 +47,10 @@ class Game:
 
 		if not log.okay:
 			raise Exception(log.log);
-	#end
+
 
 	def __str__(self):
 		return self.json.__str__();
-#end
 
 def loadGame(projName):
 	"""
@@ -93,7 +89,6 @@ def loadGame(projName):
 		logging.debug('Problems with construction: '+str(e));
 
 	return game;
-#end
 
 def getAllGames():
 	projects = set(listdir('/contrib/projects/'));
@@ -105,17 +100,14 @@ def getAllGames():
 			logging.info('Successfully loaded "%s"' % p);
 			games.append(game);
 	return games;
-#end
 
 def listGames(options):
 	for i in getAllGames():
 		print(i);
 	pass;
-#end
 
 def gameInfo(options):
 	pass;
-#end
 
 # from stackoverflow
 class VAction(argparse.Action):
@@ -146,7 +138,6 @@ def main():
 	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG));
 
 	args.func(args);
-#end
 
 if __name__ == "__main__":
     main();
