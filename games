@@ -5,9 +5,7 @@ Script for listing all games in contrib.
 games list
 games info <game>
 
-
 """
-
 import argparse
 import logging
 from datetime import datetime, timedelta
@@ -31,10 +29,7 @@ class ErrorLogger:
 			return None;
 
 class Game:
-	"""
-	Represents a single contrib/ game
-	"""
-
+	"""Represents a single contrib/ game."""
 	def __init__(self, projname, json):
 		log = ErrorLogger();
 
@@ -48,14 +43,11 @@ class Game:
 		if not log.okay:
 			raise Exception(log.log);
 
-
 	def __str__(self):
 		return self.json.__str__();
 
 def loadGame(projName):
-	"""
-	Returns either a Game or None.
-	"""
+	"""Returns either a Game or None."""
 	game = None;
 
 	f = None;
@@ -141,4 +133,3 @@ def main():
 
 if __name__ == "__main__":
     main();
-
