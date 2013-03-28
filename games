@@ -16,23 +16,33 @@ import logging
 import sys
 
 def main():
-	topParser = argparse.ArgumentParser(description='Student games information tool')
-	topParser.add_argument('-v', '--verbose', nargs='?', action=VAction, dest='verbosity', help='Show debugging information; -v 2 or -vv shows even more debugging information')
-
-	subs = topParser.add_subparsers(title='command',help='command help')
-
-	listParser = subs.add_parser('list', help='THIS IS HELPFUL')
-	listParser.set_defaults(func=listGames)
-
-	infoParser = subs.add_parser('info', help='SO IS THIS')
-	infoParser.set_defaults(func=gameInfo)
-
-	args = topParser.parse_args()
-
-	v = args.verbosity or 0
-	logging.basicConfig(level=(logging.WARNING if v < 1 else logging.INFO if v == 1 else logging.DEBUG))
-
+	args = set_and_parse_args()
+	setup_logging(args.verbosity or 0)
 	args.func(args)
+
+def set_and_parse_args():
+	parser = argparse.ArgumentParser(description='Student games information '
+			'tool')
+	parser.add_argument('-v', '--verbose', nargs='?', action=VAction,
+			dest='verbosity', help='Show debugging information; -v 2 or -vv '
+			'shows even more debugging information')
+
+	subs = parser.add_subparsers(title='command', help='command help')
+
+	list_parser = subs.add_parser('list', help='THIS IS HELPFUL')
+	list_parser.set_defaults(func=listGames)
+
+	info_parser = subs.add_parser('info', help='SO IS THIS')
+	info_parser.set_defaults(func=gameInfo)
+
+	return parser.parse_args()
+
+def setup_logging(verbosity):
+	"""Inits logging on the number of -v args received, given as verbosity."""
+	if verbosity < 1: level = logging.WARNING
+	elif verbosity == 1: level = logging.INFO
+	else: level = logging.DEBUG
+	logging.basicConfig(level=level)
 
 # from stackoverflow
 class VAction(argparse.Action):
