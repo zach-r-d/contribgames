@@ -13,7 +13,7 @@ import logging
 import re
 
 CONTRIB_DIR = '/contrib/projects/'
-GAMES_DIR = path.dirname(path.realpath(__file__))+'/'
+GAMES_DIR = path.dirname(path.realpath(__file__)) + '/'
 MANUAL_ENTRY_DIR = GAMES_DIR + 'overrides/'
 
 MANUAL_ENTRY_POSTFIX = '.json'
