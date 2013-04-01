@@ -7,14 +7,14 @@ games info <game>
 
 """
 from argparse import ArgumentParser
-from os import listdir
+from os import listdir, path
 import json
 import logging
 import re
 
 CONTRIB_DIR = '/contrib/projects/'
-GAMES_DIR = CONTRIB_DIR + 'games/'
-MANUAL_ENTRY_DIR = GAMES_DIR + 'manual/' # TODO: The path is confusing.
+GAMES_DIR = path.dirname(path.realpath(__file__))+'/'
+MANUAL_ENTRY_DIR = GAMES_DIR + 'overrides/'
 
 MANUAL_ENTRY_POSTFIX = '.json'
 GAME_JSON_FILE = '.games.json'
@@ -50,13 +50,23 @@ def print_games():
 
 def get_games_list():
 	"""Returns a list of Game for all the games in contrib."""
-	projects = set(listdir(CONTRIB_DIR))
-	projects |= {re.sub('\.json$', '', f) for f in listdir(MANUAL_ENTRY_DIR)}
+	projects = set()
+
+	if path.isdir(CONTRIB_DIR):
+		projects |= set(listdir(CONTRIB_DIR))
+	else:
+		logging.warning('Contrib directory "%s" does not exist or isn\'t a directory' % CONTRIB_DIR)
+
+	if path.isdir(MANUAL_ENTRY_DIR):
+		projects |= {re.sub('\.json$', '', f) for f in listdir(MANUAL_ENTRY_DIR)}
+	else:
+		logging.warning('Overrides directory "%s" does not exist or isn\'t a directory' % MANUAL_ENTRY_DIR)
+	
 	games = []
 	for proj_name in projects:
 		game = load_game(proj_name)
 		if isinstance(game, Game):
-			logging.info('Successfully loaded "%s".' % proj_name)
+			logging.info('Successfully loaded "%s"' % proj_name)
 			games.append(game)
 	return games
 
@@ -114,7 +124,6 @@ class Game:
 			"""Gets d[key] if it exists, otherwise None.
 
 			If a non-existent key is required, an error is logged.
-
 			"""
 			if key in d: return d[key]
 			elif required:
@@ -126,7 +135,7 @@ class Game:
 			return '; '.join(self.log)
 
 def show_game_info():
-	print('show_game_info(): NOT YET IMPLEMENTED.')
+	print('show_game_info(): NOT YET IMPLEMENTED.') #TODO
 
 if __name__ == '__main__':
 	main()
