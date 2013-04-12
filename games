@@ -19,6 +19,8 @@ MANUAL_ENTRY_DIR = GAMES_DIR + 'overrides/'
 MANUAL_ENTRY_POSTFIX = '.json'
 GAME_JSON_FILE = '.games.json'
 
+LOG = logging.getLogger("games")
+
 def main():
 	args = set_and_parse_args()
 	setup_logging(args.verbose)
@@ -43,6 +45,9 @@ def setup_logging(verbosity):
 	else: level = logging.DEBUG
 	logging.basicConfig(level=level)
 
+def get_logger(proj_name):
+	return LOG.getChild(proj_name);
+
 def print_games():
 	"""Finds all games in contrib and displays them to the user."""
 	for game in get_games_list():
@@ -55,18 +60,18 @@ def get_games_list():
 	if path.isdir(CONTRIB_DIR):
 		projects |= set(listdir(CONTRIB_DIR))
 	else:
-		logging.warning('Contrib directory "%s" does not exist or isn\'t a directory' % CONTRIB_DIR)
+		LOG.warning('Contrib directory "%s" does not exist or isn\'t a directory' % CONTRIB_DIR)
 
 	if path.isdir(MANUAL_ENTRY_DIR):
 		projects |= {re.sub('\.json$', '', f) for f in listdir(MANUAL_ENTRY_DIR)}
 	else:
-		logging.warning('Overrides directory "%s" does not exist or isn\'t a directory' % MANUAL_ENTRY_DIR)
+		LOG.warning('Overrides directory "%s" does not exist or isn\'t a directory' % MANUAL_ENTRY_DIR)
 	
 	games = []
 	for proj_name in projects:
 		game = load_game(proj_name)
 		if isinstance(game, Game):
-			logging.info('Successfully loaded "%s"' % proj_name)
+			get_logger(proj_name).info('Successfully loaded')
 			games.append(game)
 	return games
 
@@ -75,6 +80,8 @@ def load_game(proj_name):
 	proj_path = CONTRIB_DIR + proj_name + '/' + GAME_JSON_FILE
 	manual_entry_path = MANUAL_ENTRY_DIR + proj_name + MANUAL_ENTRY_POSTFIX
 
+	log = get_logger(proj_name)
+
 	json_paths = [proj_path, manual_entry_path]
 	for path in json_paths:
 		try:
@@ -82,20 +89,20 @@ def load_game(proj_name):
 				game_info = json.load(f)
 		except IOError as e:
 			# TODO: This is not true (ex: permission denied). Print e instead.
-			logging.debug(path + ' does not exist.')
+			log.debug(path + ' cannot be accessed')
 		except Exception as e: # TODO: Is there a more specific exception?
-			logging.info('Invalid json for project "%s".' % proj_name)
+			log.info(path + ' is not valid JSON: ' + str(e))
 		else:
 			break
 	else:
-		logging.info('No valid .json file found for project "%s".' % proj_name)
+		log.info('No valid .json file found')
 		return None
 
 	try:
 		game = Game(proj_name, game_info)
 	except Exception as e:
-		logging.info('Unable to construct "%s".' % proj_name)
-		logging.debug('Problems with construction: ' + str(e))
+		log.info('Unable to construct Game from json')
+		log.debug('Problems with construction: ' + str(e))
 		return None
 	return game
 
@@ -113,7 +120,7 @@ class Game:
 		if not v.valid: raise Exception(v.getLog())
 
 	def __str__(self):
-		return str(self.loaded_json)
+		return self.proj_name + ': ' + str(self.loaded_json)
 
 	class InitVerifier:
 		"""Handles verification of Game.__init__ through the given json."""
@@ -135,7 +142,7 @@ class Game:
 			return '; '.join(self.log)
 
 def show_game_info():
-	print('show_game_info(): NOT YET IMPLEMENTED.') #TODO
+	print('show_game_info(): NOT YET IMPLEMENTED') #TODO
 
 if __name__ == '__main__':
 	main()
