@@ -52,9 +52,10 @@ def print_games():
 	"""Finds all games in contrib and displays them to the user."""
 	for game in get_games_list():
 		if game.url is not None:
-			print('*', game.name, '(' + game.url + ')', '-', game.desc)
+			print('*', game.proj_name, '(' + game.url + ')', '-', game.desc)
 		else:
-			print('*', game.name, '-', game.desc)
+			print('*', game.proj_name, '-', game.desc)
+	print('\nRun \'games -i [proj_name]\' for more details.')
 
 def get_games_list():
 	"""Returns a list of Game for all the games in contrib."""
