@@ -24,7 +24,7 @@ LOG = logging.getLogger("games")
 def main():
 	args = set_and_parse_args()
 	setup_logging(args.verbose)
-	if args.info: show_game_info()
+	if args.info: show_game_info(args.info[0])
 	else: print_games()
 
 def set_and_parse_args():
@@ -52,9 +52,10 @@ def print_games():
 	"""Finds all games in contrib and displays them to the user."""
 	for game in get_games_list():
 		if game.url is not None:
-			print('*', game.name, '(' + game.url + ')', '-', game.desc)
+			print('*', game.proj_name, '(' + game.url + ')', '-', game.desc)
 		else:
-			print('*', game.name, '-', game.desc)
+			print('*', game.proj_name, '-', game.desc)
+	print('\nRun \'games -i [proj_name]\' for more details.')
 
 def get_games_list():
 	"""Returns a list of Game for all the games in contrib."""
@@ -144,8 +145,10 @@ class Game:
 		def getLog(self):
 			return '; '.join(self.log)
 
-def show_game_info():
-	print('show_game_info(): NOT YET IMPLEMENTED') #TODO
+def show_game_info(proj_name):
+	game = load_game(proj_name)
+	if game is None: exit('Specified game does not exist!')
+	print(game)
 
 if __name__ == '__main__':
 	main()
