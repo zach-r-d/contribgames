@@ -24,7 +24,7 @@ LOG = logging.getLogger("games")
 def main():
 	args = set_and_parse_args()
 	setup_logging(args.verbose)
-	if args.info: show_game_info()
+	if args.info: show_game_info(args.info[0])
 	else: print_games()
 
 def set_and_parse_args():
@@ -145,8 +145,10 @@ class Game:
 		def getLog(self):
 			return '; '.join(self.log)
 
-def show_game_info():
-	print('show_game_info(): NOT YET IMPLEMENTED') #TODO
+def show_game_info(proj_name):
+	game = load_game(proj_name)
+	if game is None: exit('Specified game does not exist!')
+	print(game)
 
 if __name__ == '__main__':
 	main()
