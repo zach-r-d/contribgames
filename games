@@ -120,7 +120,7 @@ class Game:
 		if not v.valid: raise Exception(v.getLog())
 
 	def __str__(self):
-		return self.proj_name + ': ' + str(self.loaded_json)
+		return self.proj_name + ': ' + json.dumps(self.loaded_json, indent=4)
 
 	class InitVerifier:
 		"""Handles verification of Game.__init__ through the given json."""
